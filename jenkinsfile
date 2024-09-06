@@ -4,10 +4,10 @@ pipeline {
         stage ( 'build') {
             steps {
                 sh '''
-                aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 590183962065.dkr.ecr.us-east-1.amazonaws.com
-                docker build -t docker_project .
-                docker tag docker_project:latest 590183962065.dkr.ecr.us-east-1.amazonaws.com/docker_project:${BUILD_NUMBER}
-                docker push 590183962065.dkr.ecr.us-east-1.amazonaws.com/docker_project:${BUILD_NUMBER}
+                aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 010438494499.dkr.ecr.us-east-1.amazonaws.com
+                docker build -t sample-build .
+                docker tag sample-build:latest 010438494499.dkr.ecr.us-east-1.amazonaws.com/sample-build:${BUILD_NUMBER}
+                docker push 010438494499.dkr.ecr.us-east-1.amazonaws.com/sample-build:{BUILD_NUMBER}
                 '''
 
             }
