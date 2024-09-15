@@ -1,0 +1,32 @@
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "app-scanner"
+  namespace: "scanner"
+  labels:
+    app: "frontend"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "frontend"
+  template:
+    metadata:
+      labels:
+        app: "frontend"
+    spec:
+      containers:
+        - name: "app-scanner"
+          image: "590183962065.dkr.ecr.us-east-1.amazonaws.com/kubernetes_project:xyz"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+      tolerations:
+        - key: "name"
+          operator: "Equal"
+          value: "frontend_group"
+          effect: "NoSchedule"
