@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "This template will be used to launch jenkins server and grafana server"
+
+Parameters:
+  AMI:
+    Type: AWS::EC2::Image::Id
+    Default: "ami-0e86e20dae9224db8"
+  InstanceType:
+    Type: String
+    Default: "t3.small"
+  KeyPair:
+    Type: String
+    Default: "naz"
+  SubnetId:
+    Type: String
+    Default: "subnet-09411308e0f6dfbc6"
+  SecurityGroupIds:
+    Type: String
+    Default: "sg-055c85a698410599c"
+
+Resources:
+  Nazjenkins:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref AMI
+      KeyName: !Ref KeyPair
+      InstanceType: !Ref InstanceType
+      UserData:
+        Fn::Base64
+          !Sub |
+            #!/bin/bash
+            echo "Creating Jenkins server"
+            sudo apt-get update -y
+            sudo apt install docker.io -y
+            sudo usermod -aG docker ubuntu
+            sudo docker pull jenkins/jenkins
+            sudo docker run -itd --name jenkins -p 8080:8080 jenkins/jenkins
+            echo "Successfully created Jenkins" > jenkinsfile
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 10
+            VolumeType: gp3
+            Iops: 3000
+      Tags:
+        - Key: CreatedBy
+          Value: Nazia
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          Groupset:
+            - !Ref SecurityGroupIds
+          SubnetId: !Ref SubnetId
+
+
+  Nazgrafana:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref AMI
+      KeyName: !Ref KeyPair
+      InstanceType: !Ref InstanceType
+      UserData:
+        Fn::Base64
+          !Sub |
+            #!/bin/bash
+            echo "Creating grafana server"
+            sudo apt-get update -y
+            sudo apt install docker.io -y
+            sudo usermod -aG docker ubuntu
+            sudo docker pull grafana/grafana
+            sudo docker run -itd --name grafana -p 3000:3000 grafana/grafana
+            echo "Successfully created grafana" > grafanafile
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 20
+            VolumeType: gp3
+            Iops: 3000
+      Tags:
+        - Key: CreatedBy
+          Value: Nazia
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          Groupset:
+            - !Ref SecurityGroupIds
+          SubnetId: !Ref SubnetId
+      
+  S3Bucket:
+    Type: 'AWS::S3::Bucket'
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: Naz-bucket
